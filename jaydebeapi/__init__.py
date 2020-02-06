@@ -509,7 +509,7 @@ class Cursor(object):
             # print (i, parameters[i], type(parameters[i]))
             prep_stmt.setObject(i + 1, parameters[i])
 
-    def execute(self, operation, parameters=None,use_prepared_statements=True):
+    def execute(self, operation, parameters=None,use_prepared_statements=False):
         if self._connection._closed:
             raise Error()
         if not parameters:
