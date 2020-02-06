@@ -18,6 +18,7 @@
 # <http://www.gnu.org/licenses/>.
 
 import jaydebeapi
+from jaydebeapi import OperationalError
 
 import os
 import sys
@@ -206,12 +207,25 @@ class IntegrationTestBase(object):
         self.assertEqual(cursor.rowcount, 1)
         cursor.execute("select * from ACCOUNT")
         self.assertEqual(cursor.rowcount, -1)
+    def test_sql_exception_on_execute(self):
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute("dummy stmt", use_prepared_statements=False)
+        except jaydebeapi.DatabaseError as e:
+            self.assertEquals(str(e).split(" ")[0], "java.sql.SQLException:")
+        except self.conn.OperationalError as e:
+            self.assertEquals("syntax" in str(e), True)
 
 class SqliteTestBase(IntegrationTestBase):
+
 
     def setUpSql(self):
         self.sql_file(os.path.join(_THIS_DIR, 'data', 'create.sql'))
         self.sql_file(os.path.join(_THIS_DIR, 'data', 'insert.sql'))
+    
+    def test_sql_exception_on_execute(self):
+        """Additional named parameters not supported by PySqlite"""
+
 
     def test_execute_type_blob(self):
         cursor = self.conn.cursor()

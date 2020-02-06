@@ -57,6 +57,16 @@ class MockTest(unittest.TestCase):
         result = cursor.fetchone()
         self.assertEquals(result[0], "1899-12-31")
 
+    def test_sql_exception_on_no_prepared_execute(self):
+        self.conn.jconn.mockExceptionOnExecute("java.sql.SQLException", "expected")
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute("dummy stmt", use_prepared_statements=False)
+            fail("expected exception")
+        except jaydebeapi.DatabaseError as e:
+            self.assertEquals(str(e), "java.sql.SQLException: expected")
+
+
     def test_sql_exception_on_execute(self):
         self.conn.jconn.mockExceptionOnExecute("java.sql.SQLException", "expected")
         cursor = self.conn.cursor()
